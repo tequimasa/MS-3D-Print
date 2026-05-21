@@ -28,31 +28,38 @@ async function loadData() {
         const { data: dbResult, error } = await supabase.from('app_data').select('data').eq('id', 1).single();
         
         if (error && error.code !== 'PGRST116') {
-            throw error;
+            console.warn("La base de données n'est pas encore prête, utilisation des valeurs par défaut.");
         }
 
         const data = dbResult?.data || {};
         
-        settings = { ...settings, ...data.settings };
+        // Settings avec valeurs par défaut de sécurité
+        const defaultSettings = { elecPrice: 0.25, machinePower: 250, laborRate: 30, machineHourlyCost: 1, margin: 40, tvaRate: 20 };
+        settings = { ...defaultSettings, ...settings, ...(data.settings || {}) };
+        
         products = data.products || [];
         quotes = data.quotes || [];
         orders = data.orders || [];
         invoices = data.invoices || [];
 
-        // Populate Settings Form
-        if (settings.elecPrice) document.getElementById('set-elec-price').value = settings.elecPrice;
-        if (settings.machinePower) document.getElementById('set-machine-power').value = settings.machinePower;
-        if (settings.laborRate) document.getElementById('set-labor-rate').value = settings.laborRate;
-        if (settings.machineHourlyCost) document.getElementById('set-machine-cost').value = settings.machineHourlyCost;
-        if (settings.margin) document.getElementById('set-margin').value = settings.margin;
-        if (settings.tvaRate) document.getElementById('set-tva').value = settings.tvaRate;
+    } catch (error) {
+        console.error('Erreur lors du chargement des données Supabase:', error);
+        // Si ça plante, on s'assure d'avoir au moins les valeurs par défaut
+        settings = { elecPrice: 0.25, machinePower: 250, laborRate: 30, machineHourlyCost: 1, margin: 40, tvaRate: 20 };
+    } finally {
+        // Peupler le formulaire de paramètres (Toujours exécuté)
+        if (document.getElementById('set-elec-price')) document.getElementById('set-elec-price').value = settings.elecPrice;
+        if (document.getElementById('set-machine-power')) document.getElementById('set-machine-power').value = settings.machinePower;
+        if (document.getElementById('set-labor-rate')) document.getElementById('set-labor-rate').value = settings.laborRate;
+        if (document.getElementById('set-machine-cost')) document.getElementById('set-machine-cost').value = settings.machineHourlyCost;
+        if (document.getElementById('set-margin')) document.getElementById('set-margin').value = settings.margin;
+        if (document.getElementById('set-tva')) document.getElementById('set-tva').value = settings.tvaRate;
 
+        // Rendu de l'interface (Toujours exécuté)
         renderProductList();
         renderQuoteList();
         renderOrderList();
         renderInvoiceList();
-    } catch (error) {
-        console.error('Erreur lors du chargement des données Supabase:', error);
     }
 }
 
