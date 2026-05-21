@@ -1,7 +1,16 @@
 // Configuration Supabase
 const supabaseUrl = 'https://gcteqsvtbnprlndaldvf.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdjdGVxc3Z0Ym5wcmxuZGFsZHZmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzkzNjk5OTYsImV4cCI6MjA5NDk0NTk5Nn0.r7QHqwhbJwRAnrDjIWVgBd9q0Erlr9vpEQl3M2YpF1U';
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+let supabase = null;
+try {
+    if (window.supabase) {
+        supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    } else {
+        console.warn("Le script Supabase n'est pas chargé sur cette page.");
+    }
+} catch (e) {
+    console.error("Erreur d'initialisation de Supabase:", e);
+}
 
 // State Management
 let settings = {
@@ -25,6 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load from Supabase
 async function loadData() {
     try {
+        if (!supabase) throw new Error("Supabase non initialisé.");
         const { data: dbResult, error } = await supabase.from('app_data').select('data').eq('id', 1).single();
         
         if (error && error.code !== 'PGRST116') {
@@ -66,6 +76,7 @@ async function loadData() {
 // Save to Supabase
 async function syncData() {
     try {
+        if (!supabase) throw new Error("Supabase non initialisé.");
         const payload = { settings, products, quotes, orders, invoices };
         
         const { error } = await supabase
