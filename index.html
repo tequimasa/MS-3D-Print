@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MS 3D | Chiffrage & Devis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <aside class="sidebar">
+            <div class="logo" style="display: flex; align-items: center; gap: 12px; margin-left: -5px;">
+                <img src="logo.png" alt="Logo MS 3D" style="height: 70px; width: auto; border-radius: 6px;">
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" data-view="calculator">
+                    <span class="icon">📊</span> Calculateur
+                </button>
+                <button class="nav-item" data-view="library">
+                    <span class="icon">📦</span> Bibliothèque
+                </button>
+                <button class="nav-item" data-view="quotes">
+                    <span class="icon">📄</span> Devis
+                </button>
+                <button class="nav-item" data-view="orders">
+                    <span class="icon">🛒</span> Commandes
+                </button>
+                <button class="nav-item" data-view="invoices">
+                    <span class="icon">💰</span> Factures
+                </button>
+                <button class="nav-item" data-view="settings">
+                    <span class="icon">⚙️</span> Paramètres
+                </button>
+            </nav>
+            <div class="theme-toggle">
+                <button id="toggle-theme">
+                    <span class="icon-sun">☀️</span>
+                    <span class="icon-moon">🌙</span>
+                </button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <!-- Calculator View -->
+            <section id="view-calculator" class="view active">
+                <header class="view-header">
+                    <h1>Calculateur de Coût</h1>
+                    <p>Estimez le prix de revient et de vente pour vos impressions 3D.</p>
+                </header>
+
+                <div class="calculator-grid">
+                    <div class="card form-card">
+                        <h2>Paramètres d'impression</h2>
+                        <form id="calc-form">
+                            <div class="form-group">
+                                <label for="part-name">Nom de la pièce</label>
+                                <input type="text" id="part-name" placeholder="Ex: Support Casque V2" required>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="part-weight">Poids (g)</label>
+                                    <input type="number" id="part-weight" min="0" step="0.1" value="0" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="print-time">Temps (HH:MM:SS)</label>
+                                    <input type="text" id="print-time" placeholder="00:00:00" value="00:00:00" required>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="part-qty">Quantité</label>
+                                    <input type="number" id="part-qty" min="1" value="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="filament-price">Prix Filament (€/kg)</label>
+                                    <input type="number" id="filament-price" min="0" step="0.01" value="25.00">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="prep-time">Préparation (min)</label>
+                                    <input type="number" id="prep-time" min="0" value="10">
+                                </div>
+                                <div class="form-group">
+                                    <label for="post-time">Post-traitement (min)</label>
+                                    <input type="number" id="post-time" min="0" value="15">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">Calculer le tarif</button>
+                            <button type="button" id="save-product" class="btn btn-secondary">Sauvegarder</button>
+                        </form>
+                    </div>
+
+                    <div class="card result-card">
+                        <h2>Détail du Chiffrage</h2>
+                        <div class="result-breakdown" id="result-display">
+                            <div class="result-placeholder">
+                                Entrez les paramètres pour voir le résultat.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Library View -->
+            <section id="view-library" class="view">
+                <header class="view-header">
+                    <h1>Bibliothèque de Produits</h1>
+                    <p>Gérez vos pièces déjà chiffrées et générez des devis.</p>
+                </header>
+                <div class="library-container">
+                    <div class="card">
+                        <div class="library-actions" style="margin-bottom: 1.5rem; display: flex; justify-content: flex-end;">
+                            <button id="multi-quote-btn" class="btn btn-primary">Générer Devis (Sélection)</button>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="product-table">
+                               <thead>
+                                   <tr>
+                                       <th style="width: 40px;"><input type="checkbox" id="select-all"></th>
+                                       <th>Nom</th>
+                                       <th>Détails</th>
+                                       <th>Prix Total</th>
+                                       <th>Actions</th>
+                                   </tr>
+                               </thead>
+                               <tbody id="product-list-body">
+                                   <!-- Items will be injected here -->
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Quotes View -->
+            <section id="view-quotes" class="view">
+                <header class="view-header">
+                    <h1>Gestion des Devis</h1>
+                    <p>Suivez vos devis envoyés et validez-les en commandes.</p>
+                </header>
+                <div class="card">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Réf</th>
+                                    <th>Date</th>
+                                    <th>Produits</th>
+                                    <th>Total TTC</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quote-list-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Orders View -->
+            <section id="view-orders" class="view">
+                <header class="view-header">
+                    <h1>Gestion des Commandes</h1>
+                    <p>Suivez la production et facturez vos commandes terminées.</p>
+                </header>
+                <div class="card">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Réf</th>
+                                    <th>Date</th>
+                                    <th>Total TTC</th>
+                                    <th>Statut</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="order-list-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Invoices View -->
+            <section id="view-invoices" class="view">
+                <header class="view-header">
+                    <h1>Facturation</h1>
+                    <p>Suivez les paiements de vos factures.</p>
+                </header>
+                <div class="card">
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Réf</th>
+                                    <th>Date</th>
+                                    <th>Total TTC</th>
+                                    <th>Paiement</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invoice-list-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings View -->
+            <section id="view-settings" class="view">
+                <header class="view-header">
+                    <h1>Paramètres Globaux</h1>
+                    <p>Configurez vos tarifs par défaut pour des calculs plus rapides.</p>
+                </header>
+                <div class="settings-grid">
+                    <div class="card">
+                        <h2>Tarifs & Energie</h2>
+                        <form id="settings-form">
+                            <div class="form-group">
+                                <label for="set-elec-price">Prix électricité (€/kWh) - Enedis</label>
+                                <input type="number" id="set-elec-price" step="0.0001" value="0.2516">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-machine-power">Consommation Machine (Watts)</label>
+                                <input type="number" id="set-machine-power" value="150">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-labor-rate">Taux horaire Main d'œuvre (€/h)</label>
+                                <input type="number" id="set-labor-rate" value="25">
+                            </div>
+                            <div class="form-group">
+                                <label for="set-machine-cost">Amortissement Machine (€/h)</label>
+                                <input type="number" id="set-machine-cost" step="0.01" value="0.50">
+                                <small>Prix achat / 2000h d'utilisation estimée</small>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="set-margin">Marge bénéficiaire (%)</label>
+                                    <input type="number" id="set-margin" value="40">
+                                </div>
+                                <div class="form-group">
+                                    <label for="set-tva">Taux de TVA (%)</label>
+                                    <input type="number" id="set-tva" step="0.1" value="20">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Enregistrer les paramètres</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Quote Modal -->
+    <div id="quote-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <div id="quote-printable" class="quote-template">
+                <!-- Quote content will be injected here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js"></script>
+</body>
+</html>
